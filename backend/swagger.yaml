@@ -1,0 +1,540 @@
+openapi: 3.0.0
+info:
+  title: SuiviFraisMensuels API
+  version: 1.0.0
+  description: API de gestion de budget personnel et d'épargne
+servers:
+  - url: http://localhost:3000/api
+paths:
+  /auth/register:
+    post:
+      summary: Inscription utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: Utilisateur créé
+        '400':
+          description: Erreur de validation
+        '409':
+          description: Email déjà utilisé
+  /auth/login:
+    post:
+      summary: Connexion utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Connexion réussie
+        '400':
+          description: Erreur de validation
+        '401':
+          description: Identifiants invalides
+  /auth/logout:
+    post:
+      summary: Déconnexion utilisateur
+      responses:
+        '200':
+          description: Déconnexion réussie
+  /account-config:
+    get:
+      summary: Obtenir la configuration du compte
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Config retournée
+    post:
+      summary: Créer ou mettre à jour la configuration du compte
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                overdraftLimit:
+                  type: number
+                initialBalance:
+                  type: number
+                taxRate:
+                  type: number
+                grossToNetRate:
+                  type: number
+      responses:
+        '200':
+          description: Config mise à jour
+        '201':
+          description: Config créée
+    delete:
+      summary: Supprimer la configuration du compte
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Config supprimée
+  /recurring-debits:
+    get:
+      summary: Lister les prélèvements récurrents
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Liste retournée
+    post:
+      summary: Créer un prélèvement récurrent
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                amount:
+                  type: number
+      responses:
+        '201':
+          description: Prélèvement créé
+  /recurring-debits/{id}:
+    put:
+      summary: Modifier un prélèvement récurrent
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                amount:
+                  type: number
+      responses:
+        '200':
+          description: Prélèvement modifié
+    delete:
+      summary: Supprimer un prélèvement récurrent
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Prélèvement supprimé
+  /recurring-debits/{id}/check:
+    put:
+      summary: Cocher ou décocher un prélèvement pour un mois
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                month:
+                  type: string
+                checked:
+                  type: boolean
+      responses:
+        '200':
+          description: Statut mis à jour
+  /one-time-debits:
+    get:
+      summary: Lister les prélèvements ponctuels
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Liste retournée
+    post:
+      summary: Créer un prélèvement ponctuel
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                amount:
+                  type: number
+                month:
+                  type: string
+      responses:
+        '201':
+          description: Prélèvement créé
+  /one-time-debits/{id}:
+    put:
+      summary: Modifier un prélèvement ponctuel
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                amount:
+                  type: number
+                month:
+                  type: string
+      responses:
+        '200':
+          description: Prélèvement modifié
+    delete:
+      summary: Supprimer un prélèvement ponctuel
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Prélèvement supprimé
+  /recurring-incomes:
+    get:
+      summary: Lister les revenus récurrents
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Liste retournée
+    post:
+      summary: Créer un revenu récurrent
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                amount:
+                  type: number
+                type:
+                  type: string
+                  enum: [fixed, gross]
+      responses:
+        '201':
+          description: Revenu créé
+  /recurring-incomes/{id}:
+    put:
+      summary: Modifier un revenu récurrent
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                amount:
+                  type: number
+                type:
+                  type: string
+                  enum: [fixed, gross]
+      responses:
+        '200':
+          description: Revenu modifié
+    delete:
+      summary: Supprimer un revenu récurrent
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Revenu supprimé
+  /one-time-incomes:
+    get:
+      summary: Lister les versements ponctuels
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Liste retournée
+    post:
+      summary: Créer un versement ponctuel
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                amount:
+                  type: number
+                month:
+                  type: string
+      responses:
+        '201':
+          description: Versement créé
+  /one-time-incomes/{id}:
+    put:
+      summary: Modifier un versement ponctuel
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                amount:
+                  type: number
+                month:
+                  type: string
+      responses:
+        '200':
+          description: Versement modifié
+    delete:
+      summary: Supprimer un versement ponctuel
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Versement supprimé
+  /deferred-debits:
+    get:
+      summary: Lister les débits différés
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Liste retournée
+    post:
+      summary: Créer un débit différé
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                amount:
+                  type: number
+                inputMonth:
+                  type: string
+                debitMonth:
+                  type: string
+      responses:
+        '201':
+          description: Débit différé créé
+  /deferred-debits/{id}:
+    put:
+      summary: Modifier un débit différé
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                amount:
+                  type: number
+                inputMonth:
+                  type: string
+                debitMonth:
+                  type: string
+      responses:
+        '200':
+          description: Débit différé modifié
+    delete:
+      summary: Supprimer un débit différé
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Débit différé supprimé
+  /savings:
+    get:
+      summary: Lister les épargnes mensuelles
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Liste retournée
+    post:
+      summary: Créer ou mettre à jour une saisie d'épargne
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                month:
+                  type: string
+                amount:
+                  type: number
+      responses:
+        '201':
+          description: Saisie créée ou mise à jour
+  /savings/{id}:
+    put:
+      summary: Modifier une saisie d'épargne
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                month:
+                  type: string
+                amount:
+                  type: number
+      responses:
+        '200':
+          description: Saisie modifiée
+    delete:
+      summary: Supprimer une saisie d'épargne
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Saisie supprimée
+  /summary:
+    get:
+      summary: Synthèse prévisionnelle sur 12 mois glissants
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Synthèse retournée
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: token 
